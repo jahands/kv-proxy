@@ -9,7 +9,7 @@
     "test-ci": "vitest run",
     "clean": "rm -rf ./dist",
     "patch-version": "npm version patch && scripts/pushversion.sh",
-    "publish:wrangler": "wrangler publish --minify --outdir ./dist --define SENTRY_RELEASE:$(scripts/version.sh)",
+    "publish:wrangler": "wrangler publish --outdir ./dist --define SENTRY_RELEASE:$(scripts/version.sh)",
     "sentry:sourcemaps": "npx sentry-cli --url https://sentry.uuid.rocks sourcemaps upload ./dist/ --strip-prefix './dist/../' --release $(scripts/version.sh) --org sentry --project kv-proxy",
     "sentry:commits": "npx sentry-cli --url https://sentry.uuid.rocks releases set-commits $(scripts/version.sh) --auto --org sentry --project kv-proxy",
     "sentry:finalize": "npx sentry-cli --url https://sentry.uuid.rocks releases finalize $(scripts/version.sh) --org sentry --project kv-proxy"
