@@ -1,8 +1,3 @@
-```
-npm install
-npm run dev
-```
+# KV proxy
 
-```
-npm run deploy
-```
+Used to read/write from my various kv namespaces

@@ -1,6 +1,5 @@
 import { Toucan } from 'toucan-js'
-import { AppContext, Bindings } from './types'
-import { Context } from 'hono'
+import { Bindings } from './types'
 
 declare const ENVIRONMENT: string
 
@@ -9,19 +8,15 @@ export function initSentry(
 	env: Bindings,
 	ctx: ExecutionContext
 ): Toucan {
-  
 	return new Toucan({
 		dsn: env.SENTRY_DSN,
 		context: ctx,
 		environment: ENVIRONMENT,
 		release: env.SENTRY_RELEASE,
 		request,
-		requestDataOptions: {
+    requestDataOptions: {
+      // Don't allow the `key` param to be logged
 			allowedSearchParams: /^(?!(key)$).+$/,
 		},
 	})
-}
-
-export function getSentry(c: Context<AppContext>): Toucan {
-	return c.get('sentry')
 }

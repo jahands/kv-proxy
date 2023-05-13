@@ -1,7 +1,9 @@
 import { Toucan } from 'toucan-js'
 
+export type KVNamespaces = 'eemailme'
+
 export type Bindings = {
-  EMAIL: KVNamespace
+  EEMAILME: KVNamespace
   // Had to specify port because this bypasses
   // the Sentry worker for some reason
   SENTRY_DSN: string
@@ -11,10 +13,11 @@ export type Bindings = {
 }
 
 export type Variables = {
-	sentry: Toucan
+  sentry: Toucan,
+  kv: KVNamespace
 }
 
-export type AppContext = {
+export type App = {
 	Bindings: Bindings
 	Variables: Variables
 }
