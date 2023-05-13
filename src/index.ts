@@ -23,7 +23,7 @@ app.use(async (c, next) => {
 })
 
 app.get('/', (c) => {
-	throw new Error('BOOM!')
+	return fetch('https://sentry.uuid.rocks/_health')
 	return c.text('hello world!')
 })
 
