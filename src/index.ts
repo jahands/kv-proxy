@@ -1,7 +1,31 @@
 import { Hono } from 'hono'
+import type { AppContext } from './types'
+import { getSentry, initSentry } from './sentry'
 
-const app = new Hono()
+const app = new Hono<AppContext>()
 
-app.get('/', (c) => c.text('Hello Hono!'))
+// Sentry
+app.use(async (c, next) => {
+  c.set('sentry', initSentry(c.req.raw, c.env, c.executionCtx))
+	await next()
+	if (c.error) {
+		c.get('sentry').captureException(c.error)
+  }
+})
+
+// Auth all routes
+app.use(async (c, next) => {
+  const { key } = c.req.query()
+	if (key !== c.env.API_KEY) {
+		return c.text('Unauthorized', 401)
+	}
+	await next()
+})
+
+app.get('/', (c) => {
+	throw new Error('BOOM!')
+	return c.text('hello world!')
+})
 
 export default app
+

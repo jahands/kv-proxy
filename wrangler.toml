@@ -1,2 +1,14 @@
-name = ""
-compatibility_date = "2023-01-01"
+name = "kv-proxy"
+compatibility_date = "2023-05-13"
+main = "src/index.ts"
+usage_model = "unbound"
+workers_dev = false
+
+routes = ["kv.uuid.rocks/*"]
+
+kv_namespaces = [
+  { binding = "EMAIL", id = "c5f446fc4fcf4024a0bca6cdcb4921ed" }
+]
+
+[define]
+ENVIRONMENT = '"production"'
