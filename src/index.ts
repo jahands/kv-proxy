@@ -43,9 +43,7 @@ interface kvMetadata {
 	}
 }
 
-// Sub app that has the kv namespace set. I didn't really need to do
-// this because we're mounting on / anyway. But I wanted to learn how
-// to compose apps.
+// KV app that has the kv namespace set
 const kvApp = new Hono<App & { Variables: { kv: KVNamespace } }>()
 	.use('/:namespace/:key{.*}', async (c, next) => {
 		const namespaceName = c.req.param('namespace')
@@ -108,6 +106,6 @@ const kvApp = new Hono<App & { Variables: { kv: KVNamespace } }>()
 		return c.body(null, 200)
 	})
 
-app.route('/', kvApp)
+app.route('/v1', kvApp)
 
 export default app
