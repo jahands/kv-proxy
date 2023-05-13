@@ -3,7 +3,6 @@ import { AppContext, Bindings } from './types'
 import { Context } from 'hono'
 
 declare const ENVIRONMENT: string
-declare const SENTRY_RELEASE: string
 
 export function initSentry(
 	request: Request,
@@ -15,7 +14,7 @@ export function initSentry(
 		dsn: env.SENTRY_DSN,
 		context: ctx,
 		environment: ENVIRONMENT,
-		release: SENTRY_RELEASE,
+		release: env.SENTRY_RELEASE,
 		request,
 		requestDataOptions: {
 			allowedSearchParams: /^(?!(key)$).+$/,

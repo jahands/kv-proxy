@@ -2,7 +2,8 @@ import { Toucan } from 'toucan-js'
 
 export type Bindings = {
 	EMAIL: KVNamespace
-	SENTRY_DSN: string
+  SENTRY_DSN: string
+  SENTRY_RELEASE: string
 	/** API key for authing to kv-proxy */
 	API_KEY: string
 }

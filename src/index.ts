@@ -17,7 +17,7 @@ app.use(async (c, next) => {
 app.use(async (c, next) => {
   const { key } = c.req.query()
 	if (key !== c.env.API_KEY) {
-		return c.text('Unauthorized', 401)
+		return c.text('unauthorized', 401)
 	}
 	await next()
 })
