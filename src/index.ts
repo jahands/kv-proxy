@@ -75,7 +75,7 @@ const kvApp = new Hono<App & { Variables: { kv: KVNamespace } }>()
 			'Content-Type',
 			kvRes.metadata?.headers['Content-Type'] || 'application/octet-stream'
     )
-    c.header('Cache-Control', 'public, max-age=60, s-maxage=86400')
+    c.header('Cache-Control', 'public, max-age=60, s-maxage=60')
     const response = c.body(kvRes.value)
 
 		c.executionCtx.waitUntil(cache.put(c.req.url, response.clone()))
