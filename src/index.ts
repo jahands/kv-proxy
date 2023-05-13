@@ -67,7 +67,7 @@ const kvApp = new Hono<App & { Variables: { kv: KVNamespace } }>()
 		const kvRes = await c
 			.get('kv')
 			.getWithMetadata<kvMetadata>(key, 'arrayBuffer')
-		if (!kvRes) {
+		if (!kvRes.value) {
 			return c.notFound()
 		}
 
