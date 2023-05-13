@@ -5,23 +5,24 @@ import { initSentry } from './sentry'
 const app = new Hono<App>()
 
 // Sentry
-app.use(async (c, next) => {
-	c.set('sentry', initSentry(c.req.raw, c.env, c.executionCtx))
-	await next()
-	if (c.error) {
-		c.get('sentry').captureException(c.error)
-	}
-})
-
-app.onError((err, c) => {
-	c.get('sentry').captureException(err)
-	return c.text('internal server error', 500)
-})
+app
+	.use(async (c, next) => {
+		c.set('sentry', initSentry(c.req.raw, c.env, c.executionCtx))
+		await next()
+		if (c.error) {
+			c.get('sentry').captureException(c.error)
+		}
+	})
+	.onError((err, c) => {
+		c.get('sentry').captureException(err)
+		return c.text('internal server error', 500)
+	})
 
 // Auth all routes
 app.use(async (c, next) => {
 	const { key } = c.req.query()
-	if (key !== c.env.API_KEY) {
+	const headersKey = c.req.headers.get('x-api-key')
+	if (![key, headersKey].includes(c.env.API_KEY)) {
 		return c.text('unauthorized', 401)
 	}
 	await next()
@@ -73,8 +74,9 @@ const kvApp = new Hono<App & { Variables: { kv: KVNamespace } }>()
 		c.header(
 			'Content-Type',
 			kvRes.metadata?.headers['Content-Type'] || 'application/octet-stream'
-		)
-		const response = c.body(kvRes.value)
+    )
+    c.header('Cache-Control', 'public, max-age=60, s-maxage=86400')
+    const response = c.body(kvRes.value)
 
 		c.executionCtx.waitUntil(cache.put(c.req.url, response.clone()))
 		return response
