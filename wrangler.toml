@@ -12,3 +12,7 @@ kv_namespaces = [
 
 [define]
 ENVIRONMENT = '"production"'
+
+[[r2_buckets]]
+binding = 'EEMAILMEKV'
+bucket_name = 'eemailme-kv'

@@ -1,5 +1,5 @@
 import { Hono } from 'hono'
-import type { App, Bindings, KVNamespaces } from './types'
+import type { App, Bindings, R2Buckets } from './types'
 import { initSentry } from './sentry'
 
 const app = new Hono<App>()
@@ -28,10 +28,10 @@ app.use(async (c, next) => {
 	await next()
 })
 
-function getNamespace(name: string, env: Bindings): KVNamespace | null {
-	switch (name as KVNamespaces) {
+function getNamespace(name: string, env: Bindings): R2Bucket | null {
+	switch (name as R2Buckets) {
 		case 'eemailme':
-			return env.EEMAILME
+			return env.EEMAILMEKV
 		default:
 			return null
 	}
@@ -45,7 +45,7 @@ interface kvMetadata {
 }
 
 // KV app that has the kv namespace set
-const kvApp = new Hono<App & { Variables: { kv: KVNamespace } }>()
+const kvApp = new Hono<App & { Variables: { kv: R2Bucket } }>()
 	.use('/:namespace/:key{.*}', async (c, next) => {
 		const namespaceName = c.req.param('namespace')
 		const kv = getNamespace(namespaceName, c.env)
@@ -64,19 +64,17 @@ const kvApp = new Hono<App & { Variables: { kv: KVNamespace } }>()
 		}
 
 		const key = c.req.param('key')
-		const kvRes = await c
-			.get('kv')
-			.getWithMetadata<kvMetadata>(key, 'arrayBuffer')
-		if (!kvRes.value) {
+		const kvRes = await c.get('kv').get(key)
+		if (!kvRes) {
 			return c.notFound()
 		}
 
 		c.header(
 			'Content-Type',
-			kvRes.metadata?.headers['Content-Type'] || 'application/octet-stream'
+			kvRes.httpMetadata?.contentType || 'application/octet-stream'
 		)
 		c.header('Cache-Control', 'public, max-age=60, s-maxage=60')
-		const response = c.body(kvRes.value)
+		const response = c.body(await kvRes.arrayBuffer())
 
 		c.executionCtx.waitUntil(cache.put(c.req.url, response.clone()))
 		return response
@@ -89,15 +87,11 @@ const kvApp = new Hono<App & { Variables: { kv: KVNamespace } }>()
 			return c.text('missing content-type header', 400)
 		}
 
-		const metadata: kvMetadata = {
-			headers: {
-				'Content-Type': contentType,
-			},
-		}
-
 		const body = await c.req.arrayBuffer()
 		await c.get('kv').put(key, body, {
-			metadata,
+			httpMetadata: {
+				contentType,
+			},
 		})
 		return c.body(null, 200)
 	})
