@@ -57,11 +57,11 @@ const kvApp = new Hono<App & { Variables: { kv: R2Bucket } }>()
 	})
 
 	.get('/:namespace/:key{.*}', async (c) => {
-		const cache = caches.default
-		const match = await cache.match(c.req.url)
-		if (match) {
-			return match
-		}
+		// const cache = caches.default
+		// const match = await cache.match(c.req.url)
+		// if (match) {
+		// 	return match
+		// }
 
 		const key = c.req.param('key')
 		const kvRes = await c.get('kv').get(key)
@@ -73,10 +73,10 @@ const kvApp = new Hono<App & { Variables: { kv: R2Bucket } }>()
 			'Content-Type',
 			kvRes.httpMetadata?.contentType || 'application/octet-stream'
 		)
-		c.header('Cache-Control', 'public, max-age=60, s-maxage=60')
+		c.header('Cache-Control', 'no-cache, no-store, must-revalidate')
 		const response = c.body(await kvRes.arrayBuffer())
 
-		c.executionCtx.waitUntil(cache.put(c.req.url, response.clone()))
+		// c.executionCtx.waitUntil(cache.put(c.req.url, response.clone()))
 		return response
 	})
 
