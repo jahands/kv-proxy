@@ -50,12 +50,6 @@ const kvApp = new Hono<App & { Variables: { kv: R2Bucket } }>()
 	})
 
 	.get('/:bucket/:key{.*}', async (c) => {
-		// const cache = caches.default
-		// const match = await cache.match(c.req.url)
-		// if (match) {
-		// 	return match
-		// }
-
 		const key = c.req.param('key')
 		const kvRes = await c.get('kv').get(key)
 		if (!kvRes) {
@@ -69,7 +63,6 @@ const kvApp = new Hono<App & { Variables: { kv: R2Bucket } }>()
 		c.header('Cache-Control', 'no-cache, no-store, must-revalidate')
 		const response = c.body(await kvRes.arrayBuffer())
 
-		// c.executionCtx.waitUntil(cache.put(c.req.url, response.clone()))
 		return response
 	})
 
