@@ -13,8 +13,7 @@ export type Bindings = {
 }
 
 export type Variables = {
-  sentry: Toucan,
-  kv: KVNamespace
+  sentry: Toucan
 }
 
 export type App = {
