@@ -1,6 +1,6 @@
 import { Toucan } from 'toucan-js'
 
-export type R2Buckets = 'eemailme'
+export type R2Buckets = 'eemailme-kv'
 
 export type Bindings = {
 	EEMAILMEKV: R2Bucket

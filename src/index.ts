@@ -30,7 +30,7 @@ app.use(async (c, next) => {
 
 function getBucket(name: string, env: Bindings): R2Bucket | null {
 	switch (name as R2Buckets) {
-		case 'eemailme':
+		case 'eemailme-kv':
 			return env.EEMAILMEKV
 		default:
 			return null
