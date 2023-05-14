@@ -28,7 +28,7 @@ app.use(async (c, next) => {
 	await next()
 })
 
-function getNamespace(name: string, env: Bindings): R2Bucket | null {
+function getBucket(name: string, env: Bindings): R2Bucket | null {
 	switch (name as R2Buckets) {
 		case 'eemailme':
 			return env.EEMAILMEKV
@@ -37,26 +37,19 @@ function getNamespace(name: string, env: Bindings): R2Bucket | null {
 	}
 }
 
-/** metadata for kv data */
-interface kvMetadata {
-	headers: {
-		'Content-Type': string
-	}
-}
-
-// KV app that has the kv namespace set
+// KV app that has the kv bucket set
 const kvApp = new Hono<App & { Variables: { kv: R2Bucket } }>()
-	.use('/:namespace/:key{.*}', async (c, next) => {
-		const namespaceName = c.req.param('namespace')
-		const kv = getNamespace(namespaceName, c.env)
+	.use('/:bucket/:key{.*}', async (c, next) => {
+		const bucketName = c.req.param('bucket')
+		const kv = getBucket(bucketName, c.env)
 		if (!kv) {
-			return c.text('invalid namespace', 400)
+			return c.text('invalid bucket', 400)
 		}
 		c.set('kv', kv)
 		await next()
 	})
 
-	.get('/:namespace/:key{.*}', async (c) => {
+	.get('/:bucket/:key{.*}', async (c) => {
 		// const cache = caches.default
 		// const match = await cache.match(c.req.url)
 		// if (match) {
