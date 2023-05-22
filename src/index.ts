@@ -38,20 +38,20 @@ function getBucket(name: string, env: Bindings): R2Bucket | null {
 }
 
 // KV app that has the kv bucket set
-const kvApp = new Hono<App & { Variables: { kv: R2Bucket } }>()
+const kvApp = new Hono<App & { Variables: { bucket: R2Bucket } }>()
 	.use('/:bucket/:key{.*}', async (c, next) => {
 		const bucketName = c.req.param('bucket')
-		const kv = getBucket(bucketName, c.env)
-		if (!kv) {
+		const bucket = getBucket(bucketName, c.env)
+		if (!bucket) {
 			return c.text('invalid bucket', 400)
 		}
-		c.set('kv', kv)
+		c.set('bucket', bucket)
 		await next()
 	})
 
 	.get('/:bucket/:key{.*}', async (c) => {
 		const key = c.req.param('key')
-		const kvRes = await c.get('kv').get(key)
+		const kvRes = await c.get('bucket').get(key)
 		if (!kvRes) {
 			return c.notFound()
 		}
@@ -74,7 +74,7 @@ const kvApp = new Hono<App & { Variables: { kv: R2Bucket } }>()
 		}
 
 		const body = await c.req.arrayBuffer()
-		await c.get('kv').put(key, body, {
+		await c.get('bucket').put(key, body, {
 			httpMetadata: {
 				contentType,
 			},
@@ -84,7 +84,7 @@ const kvApp = new Hono<App & { Variables: { kv: R2Bucket } }>()
 
 	.delete(async (c) => {
 		const key = c.req.param('key')
-		await c.get('kv').delete(key)
+		await c.get('bucket').delete(key)
 		return c.body(null, 200)
 	})
 
