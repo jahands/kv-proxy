@@ -1,13 +1,28 @@
 import { Hono } from 'hono'
 import type { App, Bindings, R2Buckets } from './types'
 import { initSentry } from './sentry'
+import { getCFTrace } from './trace'
 
 const app = new Hono<App>()
 
 // Sentry
 app
 	.use(async (c, next) => {
-		c.set('sentry', initSentry(c.req.raw, c.env, c.executionCtx))
+		const sentry = initSentry(c.req.raw, c.env, c.executionCtx)
+
+		try {
+			const t = await getCFTrace()
+			const cf = c.req.raw.cf
+			sentry.configureScope((scope) => {
+				scope.setContext('Cloudflare Trace', { ...t })
+				scope.setContext('Cloudflare Request.CF', { ...cf })
+				scope.setTags({ colo: t.colo, loc: t.loc })
+			})
+		} catch (e) {
+			sentry.captureException(e)
+		}
+
+		c.set('sentry', sentry)
 		await next()
 	})
 	.onError((err, c) => {
