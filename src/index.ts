@@ -4,11 +4,14 @@ import { initSentry } from './sentry'
 import { getCFTrace } from './trace'
 
 const app = new Hono<App>()
-
-// Sentry
-app
+	// Sentry
 	.use(async (c, next) => {
 		const sentry = initSentry(c.req.raw, c.env, c.executionCtx)
+		const tx = sentry.startTransaction({ name: 'fetch' })
+		sentry.configureScope((scope) => {
+			scope.setSpan(tx)
+		})
+		c.set('tx', tx)
 
 		try {
 			const t = await getCFTrace()
@@ -24,21 +27,23 @@ app
 
 		c.set('sentry', sentry)
 		await next()
+
+		tx.finish()
 	})
 	.onError((err, c) => {
 		c.get('sentry').captureException(err)
 		return c.text('internal server error', 500)
 	})
 
-// Auth all routes
-app.use(async (c, next) => {
-	const { key } = c.req.query()
-	const headersKey = c.req.headers.get('x-api-key')
-	if (![key, headersKey].includes(c.env.API_KEY)) {
-		return c.text('unauthorized', 401)
-	}
-	await next()
-})
+	// Auth all routes
+	.use(async (c, next) => {
+		const { key } = c.req.query()
+		const headersKey = c.req.headers.get('x-api-key')
+		if (![key, headersKey].includes(c.env.API_KEY)) {
+			return c.text('unauthorized', 401)
+		}
+		await next()
+	})
 
 function getBucket(name: string, env: Bindings): R2Bucket | null {
 	switch (name as R2Buckets) {

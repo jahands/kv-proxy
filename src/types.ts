@@ -1,4 +1,5 @@
 import { Toucan } from 'toucan-js'
+import { Transaction } from '@sentry/types'
 
 export type R2Buckets = 'eemailme-kv'
 
@@ -14,6 +15,7 @@ export type Bindings = {
 
 export type Variables = {
 	sentry: Toucan
+	tx: Transaction
 }
 
 export type App = {
