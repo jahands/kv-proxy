@@ -13,7 +13,6 @@ const app = new Hono<App>()
 			const t = await getCFTrace()
 			const cf = c.req.raw.cf
 			sentry.configureScope((scope) => {
-				scope.setContext('Cloudflare Trace', { ...t })
 				scope.addAttachment({
 					filename: 'cf.json',
 					contentType: 'application/json',
