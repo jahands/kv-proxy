@@ -18,7 +18,13 @@ const app = new Hono<App>()
 					contentType: 'application/json',
 					data: JSON.stringify({ cfTrace: t, 'request.cf': cf }),
 				})
-				scope.setTags({ colo: t.colo, loc: t.loc })
+				scope.setTags({
+					colo: t.colo,
+					loc: t.loc,
+					// Trying to see if these are ever different
+					cfColo: (cf?.colo || '').toString(),
+					cfLoc: (cf?.loc || '').toString(),
+				})
 			})
 		} catch (e) {
 			sentry.captureException(e)
