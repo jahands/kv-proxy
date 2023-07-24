@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import '@sentry/tracing'
 import type { App, Bindings, R2Buckets } from './types'
 import { initSentry } from './sentry'
 import { getCFTrace } from './trace'
@@ -72,19 +73,31 @@ const kvApp = new Hono<App & { Variables: { bucket: R2Bucket } }>()
 
 	.get('/:bucket/:key{.*}', async (c) => {
 		const key = c.req.param('key')
-		const kvRes = await c.get('bucket').get(key)
-		if (!kvRes) {
-			return c.notFound()
+
+		const span = c
+			.get('tx')
+			.startChild({ op: 'bucket.get', description: 'get from storage' })
+			.setData('key', key)
+
+		try {
+			const kvRes = await c.get('bucket').get(key)
+			if (!kvRes) {
+				span.setStatus('not_found')
+				return c.notFound()
+			}
+			span.setStatus('ok').setData('bodyLength', kvRes.size)
+
+			c.header(
+				'Content-Type',
+				kvRes.httpMetadata?.contentType || 'application/octet-stream'
+			)
+			c.header('Cache-Control', 'no-cache, no-store, must-revalidate')
+			const response = c.body(await kvRes.arrayBuffer())
+
+			return response
+		} finally {
+			span.finish()
 		}
-
-		c.header(
-			'Content-Type',
-			kvRes.httpMetadata?.contentType || 'application/octet-stream'
-		)
-		c.header('Cache-Control', 'no-cache, no-store, must-revalidate')
-		const response = c.body(await kvRes.arrayBuffer())
-
-		return response
 	})
 
 	.put(async (c) => {
@@ -95,18 +108,39 @@ const kvApp = new Hono<App & { Variables: { bucket: R2Bucket } }>()
 		}
 
 		const body = await c.req.arrayBuffer()
-		await c.get('bucket').put(key, body, {
-			httpMetadata: {
-				contentType,
-			},
-		})
-		return c.body(null, 200)
+
+		const span = c
+			.get('tx')
+			.startChild({ op: 'bucket.put', description: 'put to storage' })
+			.setData('bodyLength', body.byteLength)
+			.setData('contentType', contentType)
+			.setData('key', key)
+
+		try {
+			await c.get('bucket').put(key, body, {
+				httpMetadata: {
+					contentType,
+				},
+			})
+			return c.body(null, 200)
+		} finally {
+			span.finish()
+		}
 	})
 
 	.delete(async (c) => {
 		const key = c.req.param('key')
-		await c.get('bucket').delete(key)
-		return c.body(null, 200)
+		const span = c
+			.get('tx')
+			.startChild({ op: 'bucket.delete', description: 'delete from storage' })
+			.setData('key', key)
+
+		try {
+			await c.get('bucket').delete(key)
+			return c.body(null, 200)
+		} finally {
+			span.finish()
+		}
 	})
 
 app.route('/v1', kvApp)
