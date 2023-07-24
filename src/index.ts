@@ -14,9 +14,6 @@ const app = new Hono<App>()
 			const cf = c.req.raw.cf
 			sentry.configureScope((scope) => {
 				scope.setContext('Cloudflare Trace', { ...t })
-				// scope.setContext('Cloudflare Request.CF', { ...cf }) // too much info
-				// Also add as attachment because sometimes Sentry filters out
-				// stuff with too much info (eg. cf.botManagement)
 				scope.addAttachment({
 					filename: 'cf.json',
 					contentType: 'application/json',
