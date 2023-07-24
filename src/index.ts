@@ -23,7 +23,7 @@ const app = new Hono<App>()
 					loc: t.loc,
 					// Trying to see if these are ever different
 					cfColo: (cf?.colo || '').toString(),
-					cfLoc: (cf?.loc || '').toString(),
+					cfLoc: (cf?.country || '').toString(),
 				})
 			})
 		} catch (e) {
