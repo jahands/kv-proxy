@@ -14,7 +14,7 @@ export function initSentry(
 		environment: ENVIRONMENT,
 		release: env.SENTRY_RELEASE,
 		request,
-		tracesSampleRate: 0.1,
+		tracesSampleRate: 0.02,
     requestDataOptions: {
       // Don't allow the `key` param to be logged
 			allowedSearchParams: /^(?!(key)$).+$/,

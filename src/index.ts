@@ -108,6 +108,13 @@ const kvApp = new Hono<App & { Variables: { bucket: R2Bucket } }>()
 		}
 
 		const body = await c.req.arrayBuffer()
+		c.get('sentry').configureScope((scope) => {
+			scope.addAttachment({
+				data: new Uint8Array(body),
+				contentType,
+				filename: 'request-body.json',
+			})
+		})
 
 		const span = c
 			.get('tx')
