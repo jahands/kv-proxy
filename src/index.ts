@@ -8,15 +8,6 @@ const app = new Hono<App>()
 	.use(async (c, next) => {
 		const sentry = initSentry(c.req.raw, c.env, c.executionCtx)
 		c.set('sentry', sentry)
-		// todo: Find a way to use the route with placeholders as the transaction
-		// eg. /v1/:bucket/:key{.*} rather than /v1/mybucket/mykey
-		// For now, just use 'fetch' as the transaction name
-		const tx = sentry.startTransaction({ name: 'fetch' })
-		sentry.configureScope((scope) => {
-			scope.setSpan(tx)
-		})
-		c.set('tx', tx)
-
 		try {
 			const t = await getCFTrace()
 			const cf = c.req.raw.cf
@@ -28,6 +19,15 @@ const app = new Hono<App>()
 		} catch (e) {
 			sentry.captureException(e)
 		}
+
+		// todo: Find a way to use the route with placeholders as the transaction
+		// eg. /v1/:bucket/:key{.*} rather than /v1/mybucket/mykey
+		// For now, just use 'fetch' as the transaction name
+		const tx = sentry.startTransaction({ name: 'fetch' })
+		sentry.configureScope((scope) => {
+			scope.setSpan(tx)
+		})
+		c.set('tx', tx)
 
 		await next()
 
