@@ -1,6 +1,6 @@
 {
   "name": "kv-proxy",
-  "version": "0.1.34",
+  "version": "0.1.35",
   "private": true,
   "scripts": {
     "test-and-deploy": "run-s -l test-ci clean deploy:wrangler sentry:*",
