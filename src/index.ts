@@ -24,6 +24,7 @@ const app = new Hono<App>()
 					// Trying to see if these are ever different
 					cfColo: (cf?.colo || '').toString(),
 					cfLoc: (cf?.country || '').toString(),
+					method: c.req.method,
 				})
 			})
 		} catch (e) {
