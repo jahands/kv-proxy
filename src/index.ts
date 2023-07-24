@@ -110,7 +110,7 @@ const kvApp = new Hono<App & { Variables: { bucket: R2Bucket } }>()
 		const body = await c.req.arrayBuffer()
 		c.get('sentry').configureScope((scope) => {
 			scope.addAttachment({
-				data: new Uint8Array(body),
+				data: new TextDecoder().decode(body),
 				contentType,
 				filename: 'request-body.json',
 			})
