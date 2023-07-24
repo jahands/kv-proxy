@@ -7,6 +7,9 @@ const app = new Hono<App>()
 	// Sentry
 	.use(async (c, next) => {
 		const sentry = initSentry(c.req.raw, c.env, c.executionCtx)
+		// todo: Find a way to use the route with placeholders as the transaction
+		// eg. /v1/:bucket/:key{.*} rather than /v1/mybucket/mykey
+		// For now, just use 'fetch' as the transaction name
 		const tx = sentry.startTransaction({ name: 'fetch' })
 		sentry.configureScope((scope) => {
 			scope.setSpan(tx)
