@@ -95,6 +95,9 @@ const kvApp = new Hono<App & { Variables: { bucket: R2Bucket } }>()
 			const response = c.body(await kvRes.arrayBuffer())
 
 			return response
+		} catch (e) {
+			span.setStatus('internal_error')
+			throw e
 		} finally {
 			span.finish()
 		}
@@ -130,6 +133,9 @@ const kvApp = new Hono<App & { Variables: { bucket: R2Bucket } }>()
 				},
 			})
 			return c.body(null, 200)
+		} catch (e) {
+			span.setStatus('internal_error')
+			throw e
 		} finally {
 			span.finish()
 		}
@@ -145,6 +151,9 @@ const kvApp = new Hono<App & { Variables: { bucket: R2Bucket } }>()
 		try {
 			await c.get('bucket').delete(key)
 			return c.body(null, 200)
+		} catch (e) {
+			span.setStatus('internal_error')
+			throw e
 		} finally {
 			span.finish()
 		}
