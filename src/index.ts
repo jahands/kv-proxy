@@ -66,6 +66,7 @@ const kvApp = new Hono<App & { Variables: { bucket: R2Bucket } }>()
 			return c.text('invalid bucket', 400)
 		}
 		c.set('bucket', bucket)
+		c.get('sentry').setTags({ bucket: bucketName, key: c.req.param('key') })
 		await next()
 	})
 
