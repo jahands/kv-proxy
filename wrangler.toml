@@ -3,6 +3,7 @@ compatibility_date = "2023-05-13"
 main = "src/index.ts"
 usage_model = "unbound"
 workers_dev = false
+logpush = true
 
 routes = ["kv.uuid.rocks/*"]
 
