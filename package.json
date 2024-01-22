@@ -15,10 +15,12 @@
     "sentry:commits": "npx sentry-cli --url https://sentry.uuid.rocks releases set-commits $(scripts/version.sh) --auto --org sentry --project kv-proxy",
     "sentry:finalize": "npx sentry-cli --url https://sentry.uuid.rocks releases finalize $(scripts/version.sh) --org sentry --project kv-proxy"
   },
+  "packageManager": "pnpm@8.14.2",
   "dependencies": {
-    "@sentry/tracing": "^7.28.1",
+    "@sentry/tracing": "7.76.0",
+    "@sentry/types": "7.76.0",
     "hono": "^3.1.8",
-    "toucan-js": "^3.1.0"
+    "toucan-js": "3.3.1"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230717.1",
